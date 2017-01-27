@@ -1,0 +1,80 @@
+---
+title: "Reproducible Research: Peer Assessment 1"
+output: 
+  html_document:
+    keep_md: true
+---
+```{r, echo = FALSE, message = FALSE}
+require(lubridate)
+require(dplyr)
+require(ggplot2)
+require(knitr)
+```
+
+
+## Loading and preprocessing the data
+```{r}
+get_data <- function(url) {
+  temp <- tempfile()
+  download.file(url, temp)
+  data <- read.csv(unz(temp, 'activity.csv'), stringsAsFactors = FALSE, na.strings = "NA", header = TRUE)
+  data$date <- ymd(data$date)
+  return(data)
+}
+
+url <- "https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip"
+
+data <- get_data(url)
+```
+
+## What is mean total number of steps taken per day?
+```{r}
+total_steps <- data %>%
+  group_by(date) %>%
+  summarize(steps = sum(steps, na.rm = TRUE))
+
+mean_steps <- mean(total_steps$steps)
+median_steps <- median(total_steps$steps)
+```
+
+### Mean Steps per Day
+```{r, echo = FALSE}
+kable(total_steps)
+```
+
+Mean steps per day: `r round(mean_steps, 2)`
+
+Median steps per day: `r median_steps`
+
+```{r}
+qplot(total_steps$steps, binwidth = 1000, fill = I("lightblue"), col = I("midnightblue")) +
+  theme_classic() +
+  labs(x = "Number of Steps", y = "Frequency", title = "Count of Steps per Day")
+```
+
+## What is the average daily activity pattern?
+```{r}
+interval_avg <- data %>%
+  group_by(interval) %>%
+  summarize(avg_steps = mean(steps, na.rm = TRUE))
+```
+
+```{r}
+ggplot(interval_avg, aes(x = interval, y = avg_steps)) +
+  geom_line(size = 1, color = "midnightblue") +
+  theme_classic() +
+  labs(title = "Mean Steps per Interval", x = "Interval", y = "Mean Step Count")
+```
+
+```{r}
+max_steps <- filter(interval_avg, avg_steps == max(avg_steps))$interval
+```
+
+The maximum number of steps occurs in interval `r max_steps`.
+
+
+## Imputing missing values
+
+
+
+## Are there differences in activity patterns between weekdays and weekends?

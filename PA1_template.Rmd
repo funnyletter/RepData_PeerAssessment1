@@ -4,15 +4,35 @@ output:
   html_document:
     keep_md: true
 ---
+```{r, echo = FALSE, message = FALSE}
+require(lubridate)
+require(dplyr)
+require(ggplot2)
+```
 
 
 ## Loading and preprocessing the data
+```{r, echo = FALSE}
+get_data <- function(url) {
+  temp <- tempfile()
+  download.file(url, temp)
+  data <- read.csv(unz(temp, 'activity.csv'), stringsAsFactors = FALSE, na.strings = "NA", header = TRUE)
+  data$date <- ymd(data$date)
+  return(data)
+}
 
+url <- "https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip"
 
+data <- get_data(url)
+```
 
 ## What is mean total number of steps taken per day?
 
-
+```{r, echo = FALSE}
+total_steps <- data %>%
+  group_by(date) %>%
+  summarize(steps = sum(steps, na.rm = TRUE))
+```
 
 ## What is the average daily activity pattern?
 
